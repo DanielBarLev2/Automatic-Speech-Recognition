@@ -47,7 +47,8 @@ def prepare_mel_spectrogram(class_repr: dict,
     mel_spec = MelSpectrogram(sample_rate=Config.SAMPLE_RATE,
                               window=Config.WINDOW,
                               hop=Config.HOP,
-                              n_filter=Config.N_FILTER)
+                              n_filter=Config.N_FILTER,
+                              device=Config.DEVICE)
 
     MelSpectrogram.remove_mel_folder() # To update data tensors, remove comment
 

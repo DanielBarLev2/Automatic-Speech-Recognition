@@ -1,5 +1,8 @@
 import os
 
+import torch
+
+
 class Config:
     # Folders:
     RECORDS_PATH = os.path.join(os.getcwd(), "dataset", "records")
@@ -18,3 +21,6 @@ class Config:
     WINDOW = 25 # ms
     HOP = 10 # ms
     N_FILTER = 80
+
+    # CUDA
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

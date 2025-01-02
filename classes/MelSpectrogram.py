@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 
 class MelSpectrogram:
-    def __init__(self, sample_rate: int, window: int = 25, hop: int = 10, n_filter: int = 80):
+    def __init__(self, sample_rate: int, window: int = 25, hop: int = 10, n_filter: int = 80, device: str = 'cpu'):
         """
         Initialize the MelSpectrogram class.
 
@@ -16,16 +16,19 @@ class MelSpectrogram:
         :param window: Window size in milliseconds (default: 25ms).
         :param hop: Hop size in milliseconds (default: 10ms).
         :param n_filter: Number of Mel filter banks (default: 80).
+        :param device: Device to use for computations ('cpu' or 'cuda').
         """
         self.sample_rate = sample_rate
         self.window = int(sample_rate * window / 1000)
         self.hop = int(sample_rate * hop / 1000)
         self.n_filter = n_filter
+        self.device = device
 
         self.mel_transform = transforms.MelSpectrogram(sample_rate=sample_rate,
                                                        n_fft=self.window,
                                                        hop_length=self.hop,
-                                                       n_mels=n_filter)
+                                                       n_mels=n_filter).to(self.device)
+
 
     def compute(self, waveform: torch.Tensor) -> torch.Tensor:
         """
@@ -34,6 +37,7 @@ class MelSpectrogram:
         :param waveform: Tensor of shape (1, L) where L is the length of the waveform.
         :return: Tensor representing the Mel spectrogram.
         """
+        waveform = waveform.to(self.device)
         return self.mel_transform(waveform)
 
     @staticmethod
@@ -44,7 +48,7 @@ class MelSpectrogram:
         :param mel_spectrogram: Mel spectrogram tensor of shape (n_mels, time_steps).
         :param title: Title for the plot.
         """
-        plt.figure(figsize=(14, 8), dpi=150)  # Larger figure size and higher DPI
+        plt.figure(figsize=(14, 8), dpi=150)
         plt.imshow(
             mel_spectrogram.log2().detach().cpu().numpy(),
             origin='lower',
@@ -57,7 +61,7 @@ class MelSpectrogram:
         plt.ylabel("Frequency (Mel filter banks)", fontsize=14)
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
-        plt.tight_layout()  # Ensures elements fit well in the plot
+        plt.tight_layout()
         plt.show()
 
     def display_samples(self, audio_tensor: torch.Tensor, num_samples: int = 5):
@@ -67,6 +71,7 @@ class MelSpectrogram:
         :param audio_tensor: Tensor of shape (N, 1, L), where N is the number of samples.
         :param num_samples: Number of samples to display (default: 5).
         """
+        audio_tensor = audio_tensor.to(self.device)
         for i in range(min(num_samples, audio_tensor.size(0))):
             waveform = audio_tensor[i]
             mel_spectrogram = self.compute(waveform)
@@ -90,9 +95,8 @@ class MelSpectrogram:
         if not os.path.exists(Config.MEL_PATH):
             os.makedirs(Config.MEL_PATH, exist_ok=True)
 
-        # Flatten (n, sample_size) batch and compute Mel spectrograms
-        flat_waveforms = waveforms.view(-1, waveforms.size(-1))  # Flatten batch
-        mel_spectrograms = torch.stack([self.mel_transform(waveform.unsqueeze(0)) for waveform in flat_waveforms])
+        waveforms = waveforms.to(self.device)
+        mel_spectrograms = torch.stack([self.compute(waveform) for waveform in waveforms])
 
         torch.save(mel_spectrograms, file_path)
         print(f"Mel spectrograms saved to {file_path}")
