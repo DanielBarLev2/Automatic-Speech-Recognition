@@ -21,7 +21,7 @@ class MelSpectrogram:
         self.sample_rate = sample_rate
         self.window = int(sample_rate * window / 1000)
         self.hop = int(sample_rate * hop / 1000)
-        self.n_filter = n_filter
+        self.n_fft = n_filter
         self.device = device
 
         self.mel_transform = transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -39,43 +39,6 @@ class MelSpectrogram:
         """
         waveform = waveform.to(self.device)
         return self.mel_transform(waveform)
-
-    @staticmethod
-    def display(mel_spectrogram: torch.Tensor, title: str = "Mel Spectrogram"):
-        """
-        Display the Mel spectrogram using matplotlib with enhanced resolution.
-
-        :param mel_spectrogram: Mel spectrogram tensor of shape (n_mels, time_steps).
-        :param title: Title for the plot.
-        """
-        plt.figure(figsize=(14, 8), dpi=150)
-        plt.imshow(
-            mel_spectrogram.log2().detach().cpu().numpy(),
-            origin='lower',
-            aspect='auto',
-            cmap='viridis'
-        )
-        plt.colorbar(format="%+2.0f dB")
-        plt.title(title, fontsize=16)
-        plt.xlabel("Time (frames)", fontsize=14)
-        plt.ylabel("Frequency (Mel filter banks)", fontsize=14)
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.tight_layout()
-        plt.show()
-
-    def display_samples(self, audio_tensor: torch.Tensor, num_samples: int = 5):
-        """
-        Compute and display Mel spectrogram for several samples.
-
-        :param audio_tensor: Tensor of shape (N, 1, L), where N is the number of samples.
-        :param num_samples: Number of samples to display (default: 5).
-        """
-        audio_tensor = audio_tensor.to(self.device)
-        for i in range(min(num_samples, audio_tensor.size(0))):
-            waveform = audio_tensor[i]
-            mel_spectrogram = self.compute(waveform)
-            self.display(mel_spectrogram.squeeze(0), title=f"Sample {i + 1} Mel Spectrogram")
 
     def compute_mel_spectrogram(self, waveforms: torch.Tensor, file_path: str):
         """
@@ -99,6 +62,44 @@ class MelSpectrogram:
 
         torch.save(mel_spectrograms, file_path)
         print(f"Mel spectrograms saved to {file_path}")
+
+    @staticmethod
+    def display(mel_spectrogram: torch.Tensor, title: str = "Mel Spectrogram"):
+        """
+        Display the Mel spectrogram using matplotlib with enhanced resolution.
+
+        :param mel_spectrogram: Mel spectrogram tensor of shape (n_mels, time_steps).
+        :param title: Title for the plot.
+        """
+        plt.figure(figsize=(14, 8), dpi=300)
+        plt.imshow(
+            mel_spectrogram.log2().detach().cpu().numpy(),
+            origin='lower',
+            aspect='auto',
+            cmap='viridis'
+        )
+        plt.colorbar(format="%+2.0f dB")
+        plt.title(title, fontsize=16)
+        plt.xlabel("Time (frames)", fontsize=14)
+        plt.ylabel("Frequency (Mel filter banks)", fontsize=14)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+    def display_samples(self, audio_tensor: torch.Tensor, num_samples: int = 5):
+        """
+        Compute and display Mel spectrogram for several samples.
+
+        :param audio_tensor: Tensor of shape (N, 1, L), where N is the number of samples.
+        :param num_samples: Number of samples to display (default: 5).
+        """
+        for i in range(min(num_samples, audio_tensor.size(0))):
+            waveform = audio_tensor[i]
+            mel_spectrogram = self.compute(waveform)
+            self.display(mel_spectrogram.squeeze(0), title=f"Sample {i + 1} Mel Spectrogram")
+
+
 
     @staticmethod
     def remove_mel_folder():

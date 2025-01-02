@@ -58,9 +58,9 @@ class AudioDataProcessor:
                 gender = 0 if "m" == file_name.split("_")[2][0] else 1
                 genders.append(gender)
 
-        audio_tensor = torch.stack(audio_data)
-        labels_tensor = torch.tensor(labels)
-        genders_tensor = torch.tensor(genders)
+        audio_tensor = torch.stack(audio_data).to(Config.DEVICE)
+        labels_tensor = torch.tensor(labels).to(Config.DEVICE)
+        genders_tensor = torch.tensor(genders).to(Config.DEVICE)
 
         file_path = os.path.join(self.config.AUDIO_PATH, 'audio.pt')
         torch.save((audio_tensor, labels_tensor, genders_tensor), file_path)
@@ -81,7 +81,18 @@ class AudioDataProcessor:
                                                          dict[str, torch.Tensor],
                                                          dict[str, torch.Tensor]]:
         """
-        Splits data into Class Representative, Training Set, and Evaluation Set.
+        ### The split is HARD CODED to split first specker to class representative, and the next four  ###
+        ### (two males two females) to training set. The rest are belong to evaluation set.            ###
+
+        :param audio_tensor: (torch.Tensor) Tensor containing audio data for all samples. Shape: (N, C, SR).
+        :param labels_tensor: (torch.Tensor) Tensor containing class labels for each sample. Shape: (N,).
+        :param gender_tensor: (torch.Tensor) Tensor indicating gender for each sample. Shape: (N,).
+                              Values: 0 for male, 1 for female.
+
+        :return: tuple containing three dictionaries:
+            - `class_repr`: Dictionary with 'audio', 'labels', and 'gender' tensors for the Class Representative set.
+            - `training_set`: Dictionary with 'audio', 'labels', and 'gender' tensors for the Training Set.
+            - `evaluation_set`: Dictionary with 'audio', 'labels', and 'gender' tensors for the Evaluation Set.
         """
         c = labels_tensor.unique().shape[0]  # Number of classes
 
