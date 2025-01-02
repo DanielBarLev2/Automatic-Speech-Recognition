@@ -77,18 +77,17 @@ class MelSpectrogram:
             mel_spectrogram = self.compute(waveform)
             self.display(mel_spectrogram.squeeze(0), title=f"Sample {i + 1} Mel Spectrogram")
 
-    def compute_mel_spectrogram(self, waveforms: torch.Tensor, file_name: str):
+    def compute_mel_spectrogram(self, waveforms: torch.Tensor, file_path: str):
         """
         Compute and save Mel spectrogram for a batch of audio waveforms.
 
         If the file already exists, the function skips computation.
 
         :param waveforms: Tensor of shape (n, 1, sample_size) containing audio waveforms.
-        :param file_name: Name of the file to save the spectrograms.
+        :param file_path: path of the file to save the spectrograms.
         :return: None
         """
         # Define the save directory, skips if already exists
-        file_path = os.path.join(Config.MEL_PATH, file_name)
         if os.path.isfile(file_path):
             return
 

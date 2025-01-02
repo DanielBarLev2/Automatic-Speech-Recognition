@@ -3,11 +3,13 @@ from src.preparation import prepare_audio, prepare_mel_spectrogram
 
 if __name__ == "__main__":
     print(f'Using: {Config.DEVICE}')
-    class_repr, training_set, evaluation_set = prepare_audio(update=False) # set TRUE for the first time
+
+    class_repr, training_set, evaluation_set = prepare_audio()
 
     class_repr_ms, training_set_ms, evaluation_set_ms = prepare_mel_spectrogram(class_repr,
                                                                                 training_set,
-                                                                                evaluation_set)
+                                                                                evaluation_set,
+                                                                                update=True)
     print("Done, no errors")
 
 

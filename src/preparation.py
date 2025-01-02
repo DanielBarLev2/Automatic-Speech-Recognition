@@ -34,13 +34,15 @@ def prepare_audio(update: bool = False):
 
 def prepare_mel_spectrogram(class_repr: dict,
                             training_set: dict,
-                            evaluation_set: dict) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+                            evaluation_set: dict,
+                            update: bool = False) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Prepares mel spectrograms for class representative, training, and evaluation sets.
 
     :param class_repr: (dict) Class representative set with 'audio', 'labels', and 'gender'.
     :param training_set: (dict) Training set with 'audio', 'labels', and 'gender'.
     :param evaluation_set: (dict) Evaluation set with 'audio', 'labels', and 'gender'.
+    :param update: (bool) If True, removes and reloads processed data. Default is False.
     :return: tuple of mel spectrogram tensors (class_repr_ms, training_set_ms, evaluation_set_ms).
     """
     # Initializes
@@ -50,27 +52,32 @@ def prepare_mel_spectrogram(class_repr: dict,
                               n_filter=Config.N_FILTER,
                               device=Config.DEVICE)
 
-    MelSpectrogram.remove_mel_folder() # To update data tensors, remove comment
+    if update:
+        MelSpectrogram.remove_mel_folder()
+
+    class_repr['audio'] = class_repr['audio'].to(Config.DEVICE)
+    training_set['audio'] = training_set['audio'].to(Config.DEVICE)
+    evaluation_set['audio'] = evaluation_set['audio'].to(Config.DEVICE)
 
     # Loads class repr mel spectrogram
     try:
         class_repr_ms = torch.load(Config.MEL_PATH_CR, weights_only=True)
     except FileNotFoundError:
-        mel_spec.compute_mel_spectrogram(waveforms=class_repr['audio'], file_name=Config.MEL_PATH_CR)
+        mel_spec.compute_mel_spectrogram(waveforms=class_repr['audio'], file_path=Config.MEL_PATH_CR)
         class_repr_ms = torch.load(Config.MEL_PATH_CR, weights_only=True)
 
     # Loads training set mel spectrogram
     try:
         training_set_ms = torch.load(Config.MEL_PATH_TS, weights_only=True)
     except FileNotFoundError:
-        mel_spec.compute_mel_spectrogram(waveforms=training_set['audio'], file_name=Config.MEL_PATH_TS)
+        mel_spec.compute_mel_spectrogram(waveforms=training_set['audio'], file_path=Config.MEL_PATH_TS)
         training_set_ms = torch.load(Config.MEL_PATH_TS, weights_only=True)
 
     # Loads evaluation set mel spectrogram
     try:
         evaluation_set_ms = torch.load(Config.MEL_PATH_ES, weights_only=True)
     except FileNotFoundError:
-        mel_spec.compute_mel_spectrogram(waveforms=evaluation_set['audio'], file_name=Config.MEL_PATH_ES)
+        mel_spec.compute_mel_spectrogram(waveforms=evaluation_set['audio'], file_path=Config.MEL_PATH_ES)
         evaluation_set_ms = torch.load(Config.MEL_PATH_ES, weights_only=True)
 
     return class_repr_ms, training_set_ms, evaluation_set_ms
