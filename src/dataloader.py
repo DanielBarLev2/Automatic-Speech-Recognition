@@ -10,9 +10,9 @@ def load_data():
     Load audio recordings from a specified directory, preprocess them (resample, pad/Cut),
     and save them as tensors along with their labels.
 
-    If the data was already loaded to tensor form that folder, the data will not be overwritten.
+    The data is formatted as "name_digit_gender.wav". If the processed data already exists
+    in the specified directory, the function will not overwrite it.
 
-    # Data mast be formatted as "name_digit_gender.wav".
     :return: None: The function saves the processed tensors to a file specified in the configuration.
     """
 
@@ -79,3 +79,53 @@ def remove_data():
     folder_path = os.path.dirname(Config.DATA_PATH)
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
+
+
+def split_data(audio_tensor: torch.Tensor,
+               labels_tensor: torch.Tensor,
+               gender_tensor: torch.Tensor) -> tuple[dict[str, torch.Tensor],
+                                                     dict[str, torch.Tensor],
+                                                     dict[str, torch.Tensor]]:
+    """
+    Splits data into Class Representative, Training Set, and Evaluation Set.
+
+    :param audio_tensor: Audio data tensor (sorted by speaker).
+    :param labels_tensor: Digit labels tensor (sorted by speaker).
+    :param gender_tensor: Gender tensor (0 for male, 1 for female).
+
+    :return:
+        tuple: (class_repr, training_set, evaluation_set)
+        - class_repr: dict with keys 'audio', 'labels', 'gender' containing tensors for the class representative.
+        - training_set: dict with keys 'audio', 'labels', 'gender' containing tensors for the training set.
+        - evaluation_set: dict with keys 'audio', 'labels', 'gender' containing tensors for the evaluation set.
+    """
+    c = labels_tensor.unique().shape[0]  # num of classes
+
+    class_indices = (gender_tensor == torch.tensor(0))
+
+    # split the data by male and female:
+    audio_male_tensor = audio_tensor[class_indices]
+    audio_female_tensor = audio_tensor[~class_indices]
+
+    labels_male_tensor = labels_tensor[class_indices]
+    labels_female_tensor = labels_tensor[~class_indices]
+
+    gender_male_tensor = gender_tensor[class_indices]
+    gender_female_tensor = gender_tensor[~class_indices]
+
+    # Class Representative: one individual is chosen to represent the entire class
+    class_repr = {"audio": audio_male_tensor[:c],
+                  "labels": labels_male_tensor[:c],
+                  "gender": gender_male_tensor[:c]}
+
+    # Training set: Consists 2 males and 2 females
+    training_set = {"audio":  torch.concat((audio_male_tensor[c:3 * c],  audio_female_tensor[:2 * c])),
+                    "labels": torch.concat((labels_male_tensor[c:3 * c], labels_female_tensor[:2 * c])),
+                    "gender": torch.concat((gender_male_tensor[c:3 * c], gender_female_tensor[:2 * c]))}
+
+    # Evaluation Set: Consists the remaining speakers
+    evaluation_set = {"audio":   torch.concat((audio_male_tensor[3 * c:],  audio_female_tensor[2 * c:])),
+                      "labels": torch.concat((labels_male_tensor[3 * c:], labels_female_tensor[2 * c:])),
+                      "gender": torch.concat((gender_male_tensor[3 * c:], gender_female_tensor[2 * c:]))}
+
+    return class_repr, training_set, evaluation_set
