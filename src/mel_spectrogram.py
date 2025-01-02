@@ -102,6 +102,6 @@ class MelSpectrogram:
         """
         Remove the folder where Mel spectrograms are stored.
         """
-        folder_path = Config.MEL_PATH  # This points directly to "mel_spectrogram"
+        folder_path = Config.MEL_PATH
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)

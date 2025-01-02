@@ -75,7 +75,11 @@ class AudioDataProcessor:
             shutil.rmtree(folder_path)
 
     @staticmethod
-    def split_data(audio_tensor: torch.Tensor, labels_tensor: torch.Tensor, gender_tensor: torch.Tensor):
+    def split_data(audio_tensor: torch.Tensor,
+                   labels_tensor: torch.Tensor,
+                   gender_tensor: torch.Tensor) -> tuple[dict[str, torch.Tensor],
+                                                         dict[str, torch.Tensor],
+                                                         dict[str, torch.Tensor]]:
         """
         Splits data into Class Representative, Training Set, and Evaluation Set.
         """
