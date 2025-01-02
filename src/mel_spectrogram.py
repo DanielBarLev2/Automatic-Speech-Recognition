@@ -83,26 +83,25 @@ class MelSpectrogram:
         :return: None
         """
         # Define the save directory, skips if already exists
-        save_path = os.path.join(Config.MEL_PATH, file_name)
-
-        if os.path.exists(save_path):
+        file_path = os.path.join(Config.MEL_PATH, file_name)
+        if os.path.isfile(file_path):
             return
 
-        os.makedirs(Config.MEL_PATH, exist_ok=True)
+        if not os.path.exists(Config.MEL_PATH):
+            os.makedirs(Config.MEL_PATH, exist_ok=True)
 
         # Flatten (n, sample_size) batch and compute Mel spectrograms
         flat_waveforms = waveforms.view(-1, waveforms.size(-1))  # Flatten batch
         mel_spectrograms = torch.stack([self.mel_transform(waveform.unsqueeze(0)) for waveform in flat_waveforms])
 
-        torch.save(mel_spectrograms, save_path)
-        print(f"Mel spectrograms saved to {save_path}")
+        torch.save(mel_spectrograms, file_path)
+        print(f"Mel spectrograms saved to {file_path}")
 
     @staticmethod
     def remove_mel_folder():
         """
-        Remove the folder where Config.MEL_PATH is located.
+        Remove the folder where Mel spectrograms are stored.
         """
-        folder_path = os.path.dirname(Config.MEL_PATH)
+        folder_path = Config.MEL_PATH  # This points directly to "mel_spectrogram"
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
-

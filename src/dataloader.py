@@ -26,11 +26,11 @@ def load_data():
     labels = []
     genders = []
 
-    path = Config.RECORDS_PATH
+    records_path = Config.RECORDS_PATH
 
-    for file_name in sorted(os.listdir(path)):
+    for file_name in sorted(os.listdir(records_path)):
         if file_name.endswith(".wav"):
-            file_path = os.path.join(path, file_name)
+            file_path = os.path.join(records_path, file_name)
 
             wave_form, sample_rate = torchaudio.load(file_path)
 
@@ -68,6 +68,7 @@ def load_data():
 
     file_path = os.path.join(Config.AUDIO_PATH, 'audio.pt')
     torch.save((audio_tensor, labels_tensor, genders_tensor), file_path)
+    print(f"audio tensors saved to {file_path}")
 
 
 def remove_data():
