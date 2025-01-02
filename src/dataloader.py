@@ -17,13 +17,10 @@ def load_data():
     """
 
     # Define the save directory, skips if already exists
-    save_dir = os.path.join("dataset", "processed_data")
-    save_path = os.path.join(save_dir, "audio_data.pt")
-
-    if os.path.exists(save_dir):
+    if os.path.exists(Config.AUDIO_PATH):
         return
 
-    os.makedirs(save_dir, exist_ok=True)
+    os.makedirs(Config.AUDIO_PATH, exist_ok=True)
 
     audio_data = []
     labels = []
@@ -69,14 +66,15 @@ def load_data():
     labels_tensor = torch.tensor(labels)
     genders_tensor = torch.tensor(genders)
 
-    torch.save((audio_tensor, labels_tensor, genders_tensor), save_path)
+    file_path = os.path.join(Config.AUDIO_PATH, 'audio.pt')
+    torch.save((audio_tensor, labels_tensor, genders_tensor), file_path)
 
 
 def remove_data():
     """
-    Remove the folder where Config.DATA_PATH is located.
+    Remove the folder where Config.AUDIO_PATH is located.
     """
-    folder_path = os.path.dirname(Config.DATA_PATH)
+    folder_path = os.path.dirname(Config.AUDIO_PATH)
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
 
