@@ -1,7 +1,7 @@
 import torch
-from src.AudioDataProcessor import AudioDataProcessor
+from classes.AudioDataProcessor import AudioDataProcessor
 from config.config import Config
-from src.mel_spectrogram import MelSpectrogram
+from classes.MelSpectrogram import MelSpectrogram
 
 
 def prepare_audio(update: bool = False):
