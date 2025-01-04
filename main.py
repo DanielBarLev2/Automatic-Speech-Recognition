@@ -1,7 +1,4 @@
-import torch
-
 from classes.DTW import DTW
-from classes.MelSpectrogram import MelSpectrogram
 from config.config import Config
 from src.preparation import prepare_audio, prepare_mel_spectrogram
 
