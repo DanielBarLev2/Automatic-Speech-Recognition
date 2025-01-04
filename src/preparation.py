@@ -59,8 +59,8 @@ def prepare_mel_spectrogram(class_repr_audio: torch.Tensor,
                               n_filter=Config.N_FILTER,
                               device=Config.DEVICE)
 
-    # mel_spec.display_samples(audio_tensor=training_set_audio[:10], num_samples=2)
-    # mel_spec.display_samples(audio_tensor=training_set_audio[20:30], num_samples=2)
+    #mel_spec.display_samples(audio_tensor=training_set_audio[:10], num_samples=2)
+    #mel_spec.display_samples(audio_tensor=training_set_audio[20:30], num_samples=2)
 
     if update:
         MelSpectrogram.remove_mel_folder()
