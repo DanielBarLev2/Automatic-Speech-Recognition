@@ -30,7 +30,7 @@ class DTW:
 
         for i in range(1, n+1):
             for j in range(1, m+1):
-                cost = dist_func(sequence1[:, i-1], sequence2[:, j-1])
+                cost = dist_func(sequence1[:, i-1], sequence2[:, j+-1])
                 dtw_matrix[i, j] = cost + min(
                     dtw_matrix[i - 1, j],
                     dtw_matrix[i, j - 1],
@@ -43,7 +43,7 @@ class DTW:
         """
         Compute the DTW distance between the training set to the representatives set.
         """
-        n, m = self.training_set_ms.shape[0]//10, self.class_repr_ms.shape[0]
+        n, m = self.training_set_ms.shape[0]//self.class_repr_ms.shape[0], self.class_repr_ms.shape[0]
         dtw_matrix = torch.full((n, m, m), 0.0)
         training_set_squeezed = torch.squeeze(self.training_set_ms)
         class_repr_squeezed = torch.squeeze(self.class_repr_ms)
