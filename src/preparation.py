@@ -87,3 +87,28 @@ def prepare_mel_spectrogram(class_repr_audio: torch.Tensor,
         evaluation_set_ms = torch.load(Config.MEL_PATH_ES, map_location=Config.DEVICE, weights_only=True)
 
     return class_repr_ms, training_set_ms, evaluation_set_ms
+
+
+def preprocess_tensors(class_repr_ms: torch.Tensor,
+                       training_set_ms: torch.Tensor,
+                       evaluation_set_ms: torch.Tensor) -> tuple:
+    """
+    Preprocess and reshape the tensors for DTW-based classification using Numba.
+    The reshape infers the first two dimensions based on the input tensor size.
+
+    :param class_repr_ms: torch.Tensor, Class representation spectrogram tensor.
+    :param training_set_ms: torch.Tensor, Training set spectrogram tensor.
+    :param evaluation_set_ms: torch.Tensor, Evaluation set spectrogram tensor.
+    :return: tuple, Preprocessed and reshaped tensors as numpy arrays (class_repr_ms, training_set_ms, eval_set_ms).
+    """
+    # Infer dimensions for reshaping
+    num_features = class_repr_ms.shape[-2]
+    time_steps = class_repr_ms.shape[-1]
+    num_of_classes = 10
+
+    # Reshape tensors
+    class_repr_ms = class_repr_ms.reshape(-1, num_of_classes, num_features, time_steps).to('cpu').numpy()
+    training_set_ms = training_set_ms.reshape(-1, num_of_classes, num_features, time_steps).to('cpu').numpy()
+    eval_set_ms = evaluation_set_ms.reshape(-1, num_of_classes, num_features, time_steps).to('cpu').numpy()
+
+    return class_repr_ms, training_set_ms, eval_set_ms
