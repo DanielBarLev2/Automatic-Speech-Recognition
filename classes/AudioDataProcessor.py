@@ -1,8 +1,10 @@
 import os
 import torch
 import shutil
-import torchaudio
+import numpy as np
 from config.config import Config
+from scipy.signal import resample
+from scipy.io.wavfile import read
 
 
 class AudioDataProcessor:
@@ -30,25 +32,28 @@ class AudioDataProcessor:
             if file_name.endswith(".wav"):
                 file_path = os.path.join(records_path, file_name)
 
-                wave_form, sample_rate = torchaudio.load(file_path)
+                sample_rate, wave_form = read(file_path)
+
+                wave_form = np.array(wave_form, dtype=np.float32)
 
                 # Resample
-                if sample_rate != self.config.SAMPLE_RATE:
-                    resampler = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=self.config.SAMPLE_RATE)
-                    wave_form = resampler(wave_form)
+                wave_form = resample(wave_form, int(len(wave_form) * (Config.SAMPLE_RATE / sample_rate)))
 
                 # Cut
-                wave_form = wave_form[:, :self.config.MAX_LENGTH]
-                # Pad
-                if wave_form.size(1) < self.config.MAX_LENGTH:
-                    padding = self.config.MAX_LENGTH - wave_form.size(1)
-                    wave_form = torch.nn.functional.pad(wave_form, (0, padding))
+                wave_form = wave_form[:Config.SAMPLE_RATE]
 
                 # Convert stereo to mono
-                if wave_form.size(0) == 2:
-                    wave_form = torch.mean(wave_form, dim=0, keepdim=True)  # Average the two channels
+                try:
+                    if wave_form.shape[1] == 2:
+                        wave_form = np.mean(wave_form, axis=1) # Average the two channels
+                except IndexError:
+                    pass
 
-                audio_data.append(wave_form)
+                # Pad
+                if wave_form.shape[0] < Config.SAMPLE_RATE:
+                    wave_form = np.pad(wave_form, (0, Config.SAMPLE_RATE), mode='constant', constant_values=0)
+
+                audio_data.append(torch.from_numpy(wave_form).to(Config.DEVICE))
 
                 # Extract label
                 label = int(file_name.split("_")[1])
@@ -110,23 +115,23 @@ class AudioDataProcessor:
 
         # Class Representative: one individual is chosen to represent the entire class
         class_repr = {
-            "audio": audio_male_tensor[:c],
-            "labels": labels_male_tensor[:c],
-            "gender": gender_male_tensor[:c]
+            "audio": audio_female_tensor[:c],
+            "labels": audio_female_tensor[:c],
+            "gender": audio_female_tensor[:c]
         }
 
-        # Training set: Consists of 2 males and 2 females
+        # Training set: Clonsists of 2 males and 2 femaes
         training_set = {
-            "audio": torch.concat((audio_male_tensor[c:3 * c], audio_female_tensor[:2 * c])),
-            "labels": torch.concat((labels_male_tensor[c:3 * c], labels_female_tensor[:2 * c])),
-            "gender": torch.concat((gender_male_tensor[c:3 * c], gender_female_tensor[:2 * c]))
+            "audio": torch.concat((audio_female_tensor[c:3 * c], audio_male_tensor[:2 * c])),
+            "labels": torch.concat((labels_female_tensor[c:3 * c], labels_male_tensor[:2 * c])),
+            "gender": torch.concat((gender_female_tensor[c:3 * c], gender_male_tensor[:2 * c]))
         }
 
         # Evaluation Set: Consists of the remaining speakers
         evaluation_set = {
-            "audio": torch.concat((audio_male_tensor[3 * c:], audio_female_tensor[2 * c:])),
-            "labels": torch.concat((labels_male_tensor[3 * c:], labels_female_tensor[2 * c:])),
-            "gender": torch.concat((gender_male_tensor[3 * c:], gender_female_tensor[2 * c:]))
+            "audio": torch.concat((audio_female_tensor[3 * c:], audio_male_tensor[2 * c:])),
+            "labels": torch.concat((labels_female_tensor[3 * c:], labels_male_tensor[2 * c:])),
+            "gender": torch.concat((gender_female_tensor[3 * c:], gender_male_tensor[2 * c:]))
         }
 
         return class_repr, training_set, evaluation_set

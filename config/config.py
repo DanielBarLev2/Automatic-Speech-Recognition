@@ -1,5 +1,4 @@
 import os
-
 import torch
 
 
@@ -18,8 +17,8 @@ class Config:
     MAX_LENGTH = 1 * SAMPLE_RATE
 
     # Mel spectrogram parameters
-    WINDOW = 25 # ms
-    HOP = 10 # ms
+    WINDOW = int(SAMPLE_RATE * 25 / 1000)
+    HOP = int(SAMPLE_RATE * 10 / 1000)
     N_FILTER = 80
 
     # CUDA
