@@ -49,6 +49,11 @@ class AudioDataProcessor:
                 except IndexError:
                     pass
 
+                # Normalize using Automatic Gain Control (AGC)
+                max_amplitude = np.max(np.abs(wave_form))
+                if max_amplitude > 0:
+                    wave_form = wave_form / max_amplitude
+
                 # Pad
                 if wave_form.shape[0] < Config.SAMPLE_RATE:
                     wave_form = np.pad(wave_form, (0, Config.SAMPLE_RATE), mode='constant', constant_values=0)
