@@ -8,7 +8,6 @@ DTW distance computation.
 import numpy as np
 from numba import njit
 import matplotlib.pyplot as plt
-import pandas as pd
 
 @njit
 def frame_distance(vector1: np.ndarray, vector2: np.ndarray) -> float:
@@ -85,30 +84,29 @@ def display_distance_matrix(distance_matrix: np.ndarray) -> None:
 
     :param distance_matrix: Distance matrix of shape (num_speakers, num_digits, num_ref).
     """
-    mean_distance_matrix = distance_matrix.mean(axis=2)
+    for j in range(distance_matrix.shape[2]):
+        rounded_matrix = np.round(distance_matrix[:,:,j])
+        num_speakers, num_digits = rounded_matrix.shape
+        plt.figure(figsize=(num_digits, num_speakers))
 
-    rounded_matrix = np.round(mean_distance_matrix)
+        plt.imshow(rounded_matrix, cmap='viridis', interpolation='nearest')
+        plt.colorbar(label="DTW Distance")
+        plt.title(f"DTW Distance Matrix for digit {j}")
+        plt.xlabel("Digits")
+        plt.ylabel("Speakers")
 
-    plt.figure(figsize=(10, 6))
-    plt.imshow(rounded_matrix, cmap='viridis', interpolation='nearest')
-    plt.colorbar(label="DTW Distance")
-    plt.title("DTW Distance Matrix")
-    plt.xlabel("Digits")
-    plt.ylabel("Speakers")
+        plt.xticks(ticks=np.arange(num_digits), labels=[f"Digit {i}" for i in range(num_digits)])
+        plt.yticks(ticks=np.arange(num_speakers), labels=[f"Speaker {i + 1}" for i in range(num_speakers)])
 
-    num_speakers, num_digits = rounded_matrix.shape
-    plt.xticks(ticks=np.arange(num_digits), labels=[f"Digit {i}" for i in range(num_digits)])
-    plt.yticks(ticks=np.arange(num_speakers), labels=[f"Speaker {i + 1}" for i in range(num_speakers)])
+        # Annotate the cells with the rounded distance values
+        for i in range(num_speakers):
+            for j in range(num_digits):
+                plt.text(j, i, f"{rounded_matrix[i, j]:.0f}",
+                         ha='center', va='center',
+                         color='white' if rounded_matrix[i, j] > rounded_matrix.max() / 2 else 'black')
 
-    # Annotate the cells with the rounded distance values
-    for i in range(num_speakers):
-        for j in range(num_digits):
-            plt.text(j, i, f"{rounded_matrix[i, j]:.0f}",
-                     ha='center', va='center',
-                     color='white' if rounded_matrix[i, j] > rounded_matrix.max() / 2 else 'black')
-
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
 
 
 def find_optimal_threshold(dtw_dist_matrix: np.ndarray) -> float:
@@ -213,7 +211,7 @@ def plot_confusion_matrix(confusion_matrix: np.ndarray, title: str = 'Confusion 
     :param confusion_matrix: np.ndarray, Confusion matrix of shape (10, 10).
     :param title: str, Title for the plot.
     """
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=confusion_matrix.shape)
     plt.imshow(confusion_matrix, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title(title)
     plt.colorbar()
@@ -222,5 +220,13 @@ def plot_confusion_matrix(confusion_matrix: np.ndarray, title: str = 'Confusion 
     plt.yticks(tick_marks, tick_marks)
     plt.xlabel('Predicted')
     plt.ylabel('True')
+
+    # Annotate the cells with the rounded distance values
+    for i in range(confusion_matrix.shape[0]):
+        for j in range(confusion_matrix.shape[0]):
+            plt.text(j, i, f"{confusion_matrix[i, j]:.0f}",
+                     ha='center', va='center',
+                     color='white' if confusion_matrix[i, j] > confusion_matrix.max() / 2 else 'black')
+
     plt.tight_layout()
     plt.show()
