@@ -4,6 +4,7 @@ intensive functions for faster execution by compiling them to machine code. This
 is particularly beneficial for operations involving nested loops, such as the
 DTW distance computation.
 """
+import os
 
 import numpy as np
 from numba import njit
@@ -106,6 +107,11 @@ def display_distance_matrix(distance_matrix: np.ndarray) -> None:
                          color='white' if rounded_matrix[i, j] > rounded_matrix.max() / 2 else 'black')
 
         plt.tight_layout()
+
+        # Define the save directory, skips if already exists
+        if not os.path.exists("results"):
+            os.makedirs("results")
+
         plt.savefig(f"results/DTW Distance Matrix for digit {k}.png")
         plt.show()
 
@@ -230,5 +236,9 @@ def plot_confusion_matrix(confusion_matrix: np.ndarray, title: str = 'Confusion 
                      color='white' if confusion_matrix[i, j] > confusion_matrix.max() / 2 else 'black')
 
     plt.tight_layout()
+
+    # Define the save directory, skips if already exists
+    if not os.path.exists("results"):
+        os.makedirs("results")
     plt.savefig(f"results/{title}.png")
     plt.show()

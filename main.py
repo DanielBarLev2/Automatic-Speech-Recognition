@@ -52,7 +52,7 @@ def main():
     # 4. implement the collapse function B
     sequence_example = "^ab^a"
     collapse_func_example = CTC.B(sequence_example)
-    print(f"for example {sequence_example} collapse after B to {collapse_func_example}")
+    print(f"For example {sequence_example} collapse after B to {collapse_func_example}")
 
     # 5.  Implement the forward pass of the CTC algorithm
     # 5.a set the pred matrix
@@ -61,7 +61,7 @@ def main():
 
     # 5.c calculate the probability for "aba"
     prob, forward_mat = ctc.word_prob("aba")
-    print(f"the probability for aba is: {round(prob, 3)}")
+    print(f"The probability for aba is: {round(prob, 3)}")
 
     # 5.d plot the pred and forward matrix
     ctc.display_pred_matrix()
@@ -72,10 +72,10 @@ def main():
     prob, most_prob_path, prob_mat, back_mat = ctc.word_prob_for_force_alignment("aba")
 
     # 6.b the most probable path
-    print(f"the most probable path for aba is: {most_prob_path}")
+    print(f"The most probable path for aba is: {most_prob_path}")
 
     # 6.c the probability of the path
-    print(f"the probability of {most_prob_path} is: {prob}")
+    print(f"The probability of {most_prob_path} is: {prob}")
 
     # 6.d plot the forward matrix
     ctc.display_ctc_matrix(mat=prob_mat, seq=most_prob_path)
@@ -87,17 +87,14 @@ def main():
     data = pkl.load(open('force_align.pkl', 'rb'))
     label_mapping = data["label_mapping"]
     label_mapping = {value: key for key, value in label_mapping.items()}
-    audio = data["audio"]
     acoustic_model_out_probs = data["acoustic_model_out_probs"]
-    gt_text = data["gt_text"]
     text_to_align = data["text_to_align"]
     padded_word = list(f"^{'^'.join(text_to_align)}^")
     ctc = CTC(acoustic_model_out_probs, label_mapping)
 
-
     prob, most_prob_path, prob_mat, back_mat = ctc.word_prob_for_force_alignment(text_to_align)
-    print(f"the most probable path for {text_to_align} is: {most_prob_path}")
-    print(f"the probability of {most_prob_path} is: {prob}")
+    print(f"The most probable path for {text_to_align} is: {most_prob_path}")
+    print(f"The probability of {most_prob_path} is: {prob}")
     ctc.display_ctc_matrix(mat=prob_mat, seq=most_prob_path, text=padded_word)
     ctc.display_ctc_matrix(mat=back_mat, seq=most_prob_path, backtrace="backtrace", text=padded_word)
 
