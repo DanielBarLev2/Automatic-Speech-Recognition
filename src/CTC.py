@@ -180,7 +180,9 @@ class CTC:
                      color='black' if self.pred[i, j] > self.pred.max() / 2 else 'white')
 
         plt.tight_layout()
+        plt.savefig(f"results/The pred matrix.png")
         plt.show()
+
 
     def display_ctc_matrix(self, mat: np.ndarray, seq: str = "", backtrace: str = "forward", text: list = ["^", "a", "^", "b", "^", "a", "^"]) -> None:
         """
@@ -212,6 +214,7 @@ class CTC:
                      color='black' if mat[i, j] > mat.max() / 2 else 'white')
 
         plt.tight_layout()
+        plt.savefig(f"results/The {backtrace} matrix {seq}.png")
         plt.show()
 
 

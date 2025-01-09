@@ -84,14 +84,14 @@ def display_distance_matrix(distance_matrix: np.ndarray) -> None:
 
     :param distance_matrix: Distance matrix of shape (num_speakers, num_digits, num_ref).
     """
-    for j in range(distance_matrix.shape[2]):
-        rounded_matrix = np.round(distance_matrix[:,:,j])
+    for k in range(distance_matrix.shape[2]):
+        rounded_matrix = np.round(distance_matrix[:,:,k])
         num_speakers, num_digits = rounded_matrix.shape
         plt.figure(figsize=(num_digits, num_speakers))
 
         plt.imshow(rounded_matrix, cmap='viridis', interpolation='nearest')
         plt.colorbar(label="DTW Distance")
-        plt.title(f"DTW Distance Matrix for digit {j}")
+        plt.title(f"DTW Distance Matrix for digit {k}")
         plt.xlabel("Digits")
         plt.ylabel("Speakers")
 
@@ -106,6 +106,7 @@ def display_distance_matrix(distance_matrix: np.ndarray) -> None:
                          color='white' if rounded_matrix[i, j] > rounded_matrix.max() / 2 else 'black')
 
         plt.tight_layout()
+        plt.savefig(f"results/DTW Distance Matrix for digit {k}.png")
         plt.show()
 
 
@@ -229,4 +230,5 @@ def plot_confusion_matrix(confusion_matrix: np.ndarray, title: str = 'Confusion 
                      color='white' if confusion_matrix[i, j] > confusion_matrix.max() / 2 else 'black')
 
     plt.tight_layout()
+    plt.savefig(f"results/{title}.png")
     plt.show()
