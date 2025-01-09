@@ -5,13 +5,13 @@ import pickle as pkl
 
 def main():
     # 1. Data Acquisition:
-    class_repr, training_set, evaluation_set = prepare_audio(update=False)
+    class_repr, training_set, evaluation_set = prepare_audio(update=True)
 
     # 2. Mel Spectrogram:
     class_repr_ms, training_set_ms, evaluation_set_ms = prepare_mel_spectrogram(class_repr['audio'],
                                                                                 training_set['audio'],
                                                                                 evaluation_set['audio'],
-                                                                                update=False)
+                                                                                update=True)
 
     class_repr_ms, training_set_ms, evaluation_set_ms = preprocess_tensors(class_repr_ms=class_repr_ms,
                                                                            training_set_ms=training_set_ms,
